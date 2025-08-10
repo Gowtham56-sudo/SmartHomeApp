@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can only access their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Homes - users can only access homes they own
+    match /homes/{homeId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.userId;
+    }
+    
+    // Rooms - users can only access rooms in homes they own
+    match /rooms/{roomId} {
+      allow read, write: if request.auth != null && 
+        exists(/databases/$(database)/documents/homes/$(resource.data.homeId)) &&
+        get(/databases/$(database)/documents/homes/$(resource.data.homeId)).data.userId == request.auth.uid;
+      allow create: if request.auth != null && 
+        exists(/databases/$(database)/documents/homes/$(request.resource.data.homeId)) &&
+        get(/databases/$(database)/documents/homes/$(request.resource.data.homeId)).data.userId == request.auth.uid;
+    }
+    
+    // Devices - users can only access devices in rooms they own
+    match /devices/{deviceId} {
+      allow read, write: if request.auth != null && 
+        exists(/databases/$(database)/documents/rooms/$(resource.data.roomId)) &&
+        exists(/databases/$(database)/documents/homes/$(get(/databases/$(database)/documents/rooms/$(resource.data.roomId)).data.homeId)) &&
+        get(/databases/$(database)/documents/homes/$(get(/databases/$(database)/documents/rooms/$(resource.data.roomId)).data.homeId)).data.userId == request.auth.uid;
+      allow create: if request.auth != null && 
+        exists(/databases/$(database)/documents/rooms/$(request.resource.data.roomId)) &&
+        exists(/databases/$(database)/documents/homes/$(get(/databases/$(database)/documents/rooms/$(request.resource.data.roomId)).data.homeId)) &&
+        get(/databases/$(database)/documents/homes/$(get(/databases/$(database)/documents/rooms/$(request.resource.data.roomId)).data.homeId)).data.userId == request.auth.uid;
+    }
+    
+    // Voltage readings - users can only access readings for devices they own
+    match /voltage_readings/{readingId} {
+      allow read, write: if request.auth != null && 
+        exists(/databases/$(database)/documents/devices/$(resource.data.deviceId)) &&
+        exists(/databases/$(database)/documents/rooms/$(get(/databases/$(database)/documents/devices/$(resource.data.deviceId)).data.roomId)) &&
+        exists(/databases/$(database)/documents/homes/$(get(/databases/$(database)/documents/rooms/$(get(/databases/$(database)/documents/devices/$(resource.data.deviceId)).data.roomId)).data.homeId)) &&
+        get(/databases/$(database)/documents/homes/$(get(/databases/$(database)/documents/rooms/$(get(/databases/$(database)/documents/devices/$(resource.data.deviceId)).data.roomId)).data.homeId)).data.userId == request.auth.uid;
+      allow create: if request.auth != null && 
+        exists(/databases/$(database)/documents/devices/$(request.resource.data.deviceId)) &&
+        exists(/databases/$(database)/documents/rooms/$(get(/databases/$(database)/documents/devices/$(request.resource.data.deviceId)).data.roomId)) &&
+        exists(/databases/$(database)/documents/homes/$(get(/databases/$(database)/documents/rooms/$(get(/databases/$(database)/documents/devices/$(request.resource.data.deviceId)).data.roomId)).data.homeId)) &&
+        get(/databases/$(database)/documents/homes/$(get(/databases/$(database)/documents/rooms/$(get(/databases/$(database)/documents/devices/$(request.resource.data.deviceId)).data.roomId)).data.homeId)).data.userId == request.auth.uid;
+    }
+  }
+}
