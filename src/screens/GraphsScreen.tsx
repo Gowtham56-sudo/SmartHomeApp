@@ -6,8 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { LineChart, BarChart } from 'react-native-chart-kit';
+import { Platform } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { VoltageReading } from '../types';
 
@@ -55,8 +57,12 @@ const GraphsScreen: React.FC = () => {
   const getChartData = () => {
     if (voltageData.length === 0) {
       return {
-        labels: [],
-        datasets: [{ data: [] }]
+        labels: ['No Data'],
+        datasets: [{ 
+          data: [0],
+          color: (opacity = 1) => `rgba(33, 150, 243, ${opacity})`,
+          strokeWidth: 2,
+        }]
       };
     }
 
@@ -203,26 +209,35 @@ const GraphsScreen: React.FC = () => {
            <Text style={[styles.chartTitle, { color: theme.colors.text }]}>Voltage, Current & Power Trends</Text>
            {(() => {
              try {
+               const chartData = getChartData();
+               if (!chartData.labels || !chartData.datasets || chartData.datasets.length === 0) {
+                 throw new Error('Invalid chart data');
+               }
                return (
                  <LineChart
-                   data={getChartData()}
+                   data={chartData}
                    width={width - 40}
                    height={220}
+                   yAxisLabel=""
+                   yAxisSuffix=""
+                   withVerticalLines={false}
+                   withHorizontalLines={true}
                    chartConfig={{
-                     backgroundColor: theme.colors.surface,
+                     backgroundColor: 'transparent',
                      backgroundGradientFrom: theme.colors.surface,
                      backgroundGradientTo: theme.colors.surface,
                      decimalPlaces: 1,
                      color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                      labelColor: (opacity = 1) => theme.colors.textSecondary,
-                     style: {
-                       borderRadius: 16,
-                     },
                      propsForDots: {
-                       r: '4',
-                       strokeWidth: '2',
+                       r: '3',
+                       strokeWidth: '1',
                        stroke: theme.colors.primary,
                      },
+                     propsForBackgroundLines: {
+                       strokeDasharray: '',
+                     },
+                     useShadowColorFromDataset: false,
                    }}
                    bezier
                    style={styles.chart}
@@ -261,15 +276,19 @@ const GraphsScreen: React.FC = () => {
                    data={getBarChartData()}
                    width={width - 40}
                    height={220}
+                   showValuesOnTopOfBars={true}
+                   withInnerLines={false}
+                   fromZero={true}
                    chartConfig={{
-                     backgroundColor: theme.colors.surface,
+                     backgroundColor: 'transparent',
                      backgroundGradientFrom: theme.colors.surface,
                      backgroundGradientTo: theme.colors.surface,
                      decimalPlaces: 0,
                      color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
                      labelColor: (opacity = 1) => theme.colors.textSecondary,
-                     style: {
-                       borderRadius: 16,
+                     barPercentage: 0.7,
+                     propsForBackgroundLines: {
+                       strokeDasharray: '',
                      },
                    }}
                    style={styles.chart}

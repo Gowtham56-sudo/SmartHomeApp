@@ -1,8 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { signInWithPopup, onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth';
-import { auth, googleProvider, signUpWithEmail, signInWithEmail } from '../config/firebase';
+import { onAuthStateChanged, signOut, User as FirebaseUser, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import { auth, signUpWithEmail, signInWithEmail } from '../config/firebase';
 import { createUserProfile } from '../services/firestore';
 import { User } from '../types';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+
+WebBrowser.maybeCompleteAuthSession();
 
 interface AuthContextType {
   user: User | null;
@@ -26,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: firebaseUser.uid,
           email: firebaseUser.email || '',
           displayName: firebaseUser.displayName || '',
-          photoURL: firebaseUser.photoURL || undefined,
+          ...(firebaseUser.photoURL && { photoURL: firebaseUser.photoURL }), // Conditionally add photoURL
         };
         
         setUser(userData);
@@ -46,11 +50,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return unsubscribe;
   }, []);
 
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: '1035147154678-lu3j8ajmra479viqu4kfu7op9jdftms1035147154678-155bp98ebl03kd37rdoq0ah7k72e78u0.apps.googleusercontent.coms.apps.googleusercontent.com',
+    iosClientId: 'YOUR_IOS_CLIENT_ID',
+    expoClientId: 'YOUR_EXPO_CLIENT_ID'
+  });
+
   const signInWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await promptAsync();
+      if (result?.type === 'success') {
+        const { id_token } = result.params;
+        const credential = GoogleAuthProvider.credential(id_token);
+        await signInWithCredential(auth, credential);
+      }
     } catch (error) {
       console.error('Google sign-in error:', error);
+      throw error;
     }
   };
 
