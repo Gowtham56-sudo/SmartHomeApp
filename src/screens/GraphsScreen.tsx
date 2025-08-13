@@ -196,115 +196,116 @@ const GraphsScreen: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: theme.colors.text }]}>Voltage Monitoring</Text>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}> 
+      <View style={styles.header}> 
+        <Text style={[styles.title, { color: theme.colors.text }]}>Voltage Monitoring</Text> 
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {renderFilterButtons()}
+      <View style={styles.content}> 
+        {renderFilterButtons()} 
         {renderSummaryCards()}
 
-                 <View style={[styles.chartContainer, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-           <Text style={[styles.chartTitle, { color: theme.colors.text }]}>Voltage, Current & Power Trends</Text>
-           {(() => {
-             try {
-               const chartData = getChartData();
-               if (!chartData.labels || !chartData.datasets || chartData.datasets.length === 0) {
-                 throw new Error('Invalid chart data');
-               }
-               return (
-                 <LineChart
-                   data={chartData}
-                   width={width - 40}
-                   height={220}
-                   yAxisLabel=""
-                   yAxisSuffix=""
-                   withVerticalLines={false}
-                   withHorizontalLines={true}
-                   chartConfig={{
-                     backgroundColor: 'transparent',
-                     backgroundGradientFrom: theme.colors.surface,
-                     backgroundGradientTo: theme.colors.surface,
-                     decimalPlaces: 1,
-                     color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                     labelColor: (opacity = 1) => theme.colors.textSecondary,
-                     propsForDots: {
-                       r: '3',
-                       strokeWidth: '1',
-                       stroke: theme.colors.primary,
-                     },
-                     propsForBackgroundLines: {
-                       strokeDasharray: '',
-                     },
-                     useShadowColorFromDataset: false,
-                   }}
-                   bezier
-                   style={styles.chart}
-                 />
-               );
-             } catch (error) {
-               return (
-                 <View style={{ height: 220, justifyContent: 'center', alignItems: 'center' }}>
-                   <Text style={{ color: theme.colors.textSecondary }}>Chart loading...</Text>
-                 </View>
-               );
-             }
-           })()}
-                     <View style={styles.legend}>
-             <View style={styles.legendItem}>
-               <View style={[styles.legendColor, { backgroundColor: theme.colors.primary }]} />
-               <Text style={[styles.legendText, { color: theme.colors.text }]}>Voltage (V)</Text>
-             </View>
-             <View style={styles.legendItem}>
-               <View style={[styles.legendColor, { backgroundColor: theme.colors.secondary }]} />
-               <Text style={[styles.legendText, { color: theme.colors.text }]}>Current (A)</Text>
-             </View>
-             <View style={styles.legendItem}>
-               <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} />
-               <Text style={[styles.legendText, { color: theme.colors.text }]}>Power (W)</Text>
-             </View>
-           </View>
+        <View style={[styles.chartContainer, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}> 
+          <Text style={[styles.chartTitle, { color: theme.colors.text }]}>Voltage, Current & Power Trends</Text> 
+          {(() => {
+            try {
+              const chartData = getChartData();
+              if (!chartData.labels || !chartData.datasets || chartData.datasets.length === 0) {
+                throw new Error('Invalid chart data');
+              }
+              return (
+                <LineChart
+                  data={chartData}
+                  width={width - 40}
+                  height={220}
+                  yAxisLabel=""
+                  yAxisSuffix=""
+                  withVerticalLines={false}
+                  withHorizontalLines={true}
+                  chartConfig={{
+                    backgroundColor: 'transparent',
+                    backgroundGradientFrom: theme.colors.surface,
+                    backgroundGradientTo: theme.colors.surface,
+                    decimalPlaces: 1,
+                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    labelColor: (opacity = 1) => theme.colors.textSecondary,
+                    propsForDots: {
+                      r: '3',
+                      strokeWidth: '1',
+                      stroke: theme.colors.primary,
+                    },
+                    propsForBackgroundLines: {
+                      strokeDasharray: '',
+                    },
+                    useShadowColorFromDataset: false,
+                  }}
+                  bezier
+                  style={styles.chart}
+                />
+              );
+            } catch (error) {
+              return (
+                <View style={{ height: 220, justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{ color: theme.colors.textSecondary }}>Chart loading...</Text>
+                </View>
+              );
+            }
+          })()}
+          <View style={styles.legend}> 
+            <View style={styles.legendItem}> 
+              <View style={[styles.legendColor, { backgroundColor: theme.colors.primary }]} /> 
+              <Text style={[styles.legendText, { color: theme.colors.text }]}>Voltage (V)</Text> 
+            </View> 
+            <View style={styles.legendItem}> 
+              <View style={[styles.legendColor, { backgroundColor: theme.colors.secondary }]} /> 
+              <Text style={[styles.legendText, { color: theme.colors.text }]}>Current (A)</Text> 
+            </View> 
+            <View style={styles.legendItem}> 
+              <View style={[styles.legendColor, { backgroundColor: '#4CAF50' }]} /> 
+              <Text style={[styles.legendText, { color: theme.colors.text }]}>Power (W)</Text> 
+            </View> 
+          </View> 
         </View>
 
-                 <View style={[styles.chartContainer, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-           <Text style={[styles.chartTitle, { color: theme.colors.text }]}>Power Consumption</Text>
-           {(() => {
-             try {
-               return (
-                 <BarChart
-                   data={getBarChartData()}
-                   width={width - 40}
-                   height={220}
-                   showValuesOnTopOfBars={true}
-                   withInnerLines={false}
-                   fromZero={true}
-                   chartConfig={{
-                     backgroundColor: 'transparent',
-                     backgroundGradientFrom: theme.colors.surface,
-                     backgroundGradientTo: theme.colors.surface,
-                     decimalPlaces: 0,
-                     color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
-                     labelColor: (opacity = 1) => theme.colors.textSecondary,
-                     barPercentage: 0.7,
-                     propsForBackgroundLines: {
-                       strokeDasharray: '',
-                     },
-                   }}
-                   style={styles.chart}
-                   showValuesOnTopOfBars
-                 />
-               );
-             } catch (error) {
-               return (
-                 <View style={{ height: 220, justifyContent: 'center', alignItems: 'center' }}>
-                   <Text style={{ color: theme.colors.textSecondary }}>Chart loading...</Text>
-                 </View>
-               );
-             }
-           })()}
-         </View>
-      </ScrollView>
+        <View style={[styles.chartContainer, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}> 
+          <Text style={[styles.chartTitle, { color: theme.colors.text }]}>Power Consumption</Text> 
+          {(() => {
+            try {
+              return (
+                <BarChart
+                  data={getBarChartData()}
+                  width={width - 40}
+                  height={220}
+                  yAxisLabel=""
+                  yAxisSuffix="W"
+                  showValuesOnTopOfBars={true}
+                  withInnerLines={false}
+                  fromZero={true}
+                  chartConfig={{
+                    backgroundColor: 'transparent',
+                    backgroundGradientFrom: theme.colors.surface,
+                    backgroundGradientTo: theme.colors.surface,
+                    decimalPlaces: 0,
+                    color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
+                    labelColor: (opacity = 1) => theme.colors.textSecondary,
+                    barPercentage: 0.7,
+                    propsForBackgroundLines: {
+                      strokeDasharray: '',
+                    },
+                  }}
+                  style={styles.chart}
+                />
+              );
+            } catch (error) {
+              return (
+                <View style={{ height: 220, justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{ color: theme.colors.textSecondary }}>Chart loading...</Text>
+                </View>
+              );
+            }
+          })()}
+        </View>
+      </View>
     </View>
   );
 };

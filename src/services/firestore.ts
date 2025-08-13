@@ -28,13 +28,17 @@ const COLLECTIONS = {
 export const createUserProfile = async (user: User) => {
   try {
     const userRef = doc(db, COLLECTIONS.USERS, user.id);
-    await updateDoc(userRef, {
+    const userData: any = {
       email: user.email,
       displayName: user.displayName,
-      photoURL: user.photoURL,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
-    });
+    };
+    if (user.photoURL !== undefined) {
+      userData.photoURL = user.photoURL;
+    }
+  const { setDoc } = await import('firebase/firestore');
+  await setDoc(userRef, userData, { merge: true });
   } catch (error) {
     console.error('Error creating user profile:', error);
     throw error;

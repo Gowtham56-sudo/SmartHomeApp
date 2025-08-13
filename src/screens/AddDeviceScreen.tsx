@@ -6,10 +6,10 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  ScrollView,
   ActivityIndicator,
   FlatList,
 } from 'react-native';
+import WifiManager from 'react-native-wifi-reborn';
 import { useTheme } from '../context/ThemeContext';
 import { Room, Device } from '../types';
 
@@ -71,11 +71,18 @@ const AddDeviceScreen: React.FC<{ navigation: any; route?: any }> = ({ navigatio
     }
 
     setConnecting(true);
-    // Simulate connection process
-    setTimeout(() => {
+    try {
+      await WifiManager.connectToProtectedSSID(selectedNetwork.ssid, password, false, false);
       setConnecting(false);
       setStep('configure');
-    }, 3000);
+      Alert.alert('Success', 'Connected to device WiFi!');
+    } catch (error) {
+      setConnecting(false);
+      const errorMessage = typeof error === 'object' && error !== null && 'message' in error
+        ? (error as { message?: string }).message
+        : undefined;
+      Alert.alert('Connection Failed', errorMessage || 'Could not connect to WiFi.');
+    }
   };
 
   const handleAddDevice = () => {
@@ -119,7 +126,7 @@ const AddDeviceScreen: React.FC<{ navigation: any; route?: any }> = ({ navigatio
         </Text>
       </View>
       {item.isConnected && (
-        <Text style={[styles.connectedText, { color: theme.colors.success }]}>Connected</Text>
+        <Text style={[styles.connectedText, { color: theme.colors.primary }]}>Connected</Text>
       )}
     </TouchableOpacity>
   );
@@ -235,7 +242,7 @@ const AddDeviceScreen: React.FC<{ navigation: any; route?: any }> = ({ navigatio
       </View>
 
       <TouchableOpacity
-        style={[styles.addButton, { backgroundColor: theme.colors.success }]}
+        style={[styles.addButton, { backgroundColor: theme.colors.primary }]}
         onPress={handleAddDevice}
       >
         <Text style={[styles.addButtonText, { color: theme.colors.surface }]}>Add Device</Text>
@@ -244,20 +251,20 @@ const AddDeviceScreen: React.FC<{ navigation: any; route?: any }> = ({ navigatio
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={[styles.backButton, { color: theme.colors.primary }]}>← Back</Text>
-        </TouchableOpacity>
-        <Text style={[styles.title, { color: theme.colors.text }]}>Add Device</Text>
-        <View style={{ width: 50 }} />
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}> 
+      <View style={styles.header}> 
+        <TouchableOpacity onPress={() => navigation.goBack()}> 
+          <Text style={[styles.backButton, { color: theme.colors.primary }]}>← Back</Text> 
+        </TouchableOpacity> 
+        <Text style={[styles.title, { color: theme.colors.text }]}>Add Device</Text> 
+        <View style={{ width: 50 }} /> 
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {step === 'scan' && renderScanStep()}
-        {step === 'connect' && renderConnectStep()}
-        {step === 'configure' && renderConfigureStep()}
-      </ScrollView>
+      <View style={styles.content}> 
+        {step === 'scan' && renderScanStep()} 
+        {step === 'connect' && renderConnectStep()} 
+        {step === 'configure' && renderConfigureStep()} 
+      </View> 
     </View>
   );
 };
