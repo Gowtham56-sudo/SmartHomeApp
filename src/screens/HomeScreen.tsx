@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Home, Room } from '../types';
+import { getHomeRooms } from '../services/firestore';
 import { useHomes } from '../hooks/useFirestore';
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
@@ -20,6 +21,23 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [homeName, setHomeName] = useState('');
   const [homeAddress, setHomeAddress] = useState('');
+  const [homeRoomsCount, setHomeRoomsCount] = useState<{ [homeId: string]: number }>({});
+
+  React.useEffect(() => {
+    const fetchRoomsCount = async () => {
+      const counts: { [homeId: string]: number } = {};
+      await Promise.all(homes.map(async (home) => {
+        try {
+          const rooms = await getHomeRooms(home.id);
+          counts[home.id] = rooms.length;
+        } catch {
+          counts[home.id] = 0;
+        }
+      }));
+      setHomeRoomsCount(counts);
+    };
+    if (homes.length > 0) fetchRoomsCount();
+  }, [homes]);
 
   const handleAddHome = () => {
     setModalVisible(true);
@@ -49,25 +67,13 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <Text style={[styles.homeName, { color: theme.colors.text }]}>{item.name}</Text>
         <Text style={[styles.homeAddress, { color: theme.colors.textSecondary }]}>{item.address}</Text>
       </View>
-      
+
       <View style={styles.homeStats}>
         <View style={styles.statItem}>
-          <Text style={[styles.statNumber, { color: theme.colors.primary }]}>{item.rooms.length}</Text>
+          <Text style={[styles.statNumber, { color: theme.colors.primary }]}>{homeRoomsCount[item.id] ?? 0}</Text>
           <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Rooms</Text>
         </View>
-        <View style={styles.statItem}>
-          <Text style={[styles.statNumber, { color: theme.colors.secondary }]}>
-            {item.rooms.reduce((total, room) => total + room.devices.length, 0)}
-          </Text>
-          <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>Devices</Text>
-        </View>
-      </View>
-
-      <View style={styles.roomPreview}>
-        <Text style={[styles.roomPreviewTitle, { color: theme.colors.textSecondary }]}>Rooms:</Text>
-        <Text style={[styles.roomPreviewText, { color: theme.colors.text }]}>
-          {item.rooms.map(room => room.name).join(', ')}
-        </Text>
+        {/* Devices count can be fetched similarly if needed */}
       </View>
     </TouchableOpacity>
   );

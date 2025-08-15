@@ -78,7 +78,7 @@ const ProfileScreen: React.FC = () => {
       <View style={styles.settingItem}>
         <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Dark Mode</Text>
         <Switch
-          value={theme.isDark}
+          value={theme.dark}
           onValueChange={toggleTheme}
           trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
           thumbColor={theme.colors.surface}
@@ -225,10 +225,10 @@ const ProfileScreen: React.FC = () => {
         {renderSupportSection()}
 
         <TouchableOpacity
-          style={[styles.logoutButton, { backgroundColor: theme.colors.error }]}
+          style={[styles.logoutButton, styles.logoutButtonEnhanced, { backgroundColor: theme.colors.primary }]}
           onPress={handleLogout}
         >
-          <Text style={[styles.logoutButtonText, { color: theme.colors.surface }]}>Logout</Text>
+          <Text style={[styles.logoutButtonText, styles.logoutButtonTextEnhanced, { color: theme.colors.surface }]}>⎋ Logout</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -340,10 +340,39 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
+    marginBottom: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 6,
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  logoutButtonEnhanced: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    borderColor: '#ffcccc',
+    borderWidth: 2,
+    elevation: 8,
+    shadowColor: '#ff0000',
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
   },
   logoutButtonText: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  logoutButtonTextEnhanced: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    textShadowColor: '#fff',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   modalOverlay: {
     position: 'absolute',

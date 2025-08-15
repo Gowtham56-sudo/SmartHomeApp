@@ -27,32 +27,38 @@ const AddDeviceScreen: React.FC<{ navigation: any; route?: any }> = ({ navigatio
   const [scanning, setScanning] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [networks, setNetworks] = useState<WiFiNetwork[]>([]);
+  const [scanError, setScanError] = useState<string | null>(null);
   const [selectedNetwork, setSelectedNetwork] = useState<WiFiNetwork | null>(null);
   const [password, setPassword] = useState('');
   const [deviceName, setDeviceName] = useState('');
   const [deviceType, setDeviceType] = useState<'light' | 'fan' | 'switch'>('light');
 
-  // Mock WiFi networks for demonstration
   useEffect(() => {
     if (step === 'scan') {
       scanNetworks();
     }
   }, [step]);
 
+  // Scan for real WiFi networks
   const scanNetworks = async () => {
     setScanning(true);
-    // Simulate network scanning
-    setTimeout(() => {
-      const mockNetworks: WiFiNetwork[] = [
-        { ssid: 'HomeWiFi', signalStrength: 85, isConnected: true },
-        { ssid: 'ESP8266_Device_001', signalStrength: 72, isConnected: false },
-        { ssid: 'ESP8266_Device_002', signalStrength: 68, isConnected: false },
-        { ssid: 'NeighborWiFi', signalStrength: 45, isConnected: false },
-        { ssid: 'ESP8266_Light_001', signalStrength: 78, isConnected: false },
-      ];
-      setNetworks(mockNetworks);
-      setScanning(false);
-    }, 2000);
+    setScanError(null);
+    try {
+      const results = await WifiManager.loadWifiList();
+      const parsedNetworks: WiFiNetwork[] = results.map((net: any) => ({
+        ssid: net.SSID,
+        signalStrength: net.level,
+        isConnected: false
+      }));
+      setNetworks(parsedNetworks);
+      if (parsedNetworks.length === 0) {
+        setScanError('No WiFi devices found. Make sure your ESP device is powered on and in range.');
+      }
+    } catch (error) {
+      setScanError('Failed to scan WiFi networks. Please check permissions and try again.');
+      setNetworks([]);
+    }
+    setScanning(false);
   };
 
   const handleNetworkSelect = (network: WiFiNetwork) => {
@@ -91,18 +97,10 @@ const AddDeviceScreen: React.FC<{ navigation: any; route?: any }> = ({ navigatio
       return;
     }
 
-    const newDevice: Device = {
-      id: Date.now().toString(),
-      name: deviceName.trim(),
-      type: deviceType,
-      isOn: false,
-      ipAddress: '192.168.1.' + Math.floor(Math.random() * 255),
-      voltage: 120,
-      current: 0,
-      power: 0,
-    };
+    // Here you would connect to the ESP module and get real device data
+    // Example: fetch device info from ESP8266 via HTTP or MQTT
+    // Then save the device to Firebase
 
-    // Here you would save the device to Firebase
     Alert.alert('Success', 'Device added successfully!', [
       { text: 'OK', onPress: () => navigation.navigate('Home') },
     ]);
@@ -141,9 +139,17 @@ const AddDeviceScreen: React.FC<{ navigation: any; route?: any }> = ({ navigatio
       {scanning ? (
         <View style={styles.scanningContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={[styles.scanningText, { color: theme.colors.textSecondary }]}>
+          <Text style={[styles.scanningText, { color: theme.colors.textSecondary }]}> 
             Scanning for devices...
           </Text>
+        </View>
+      ) : scanError ? (
+        <View style={styles.scanningContainer}>
+          <Text style={[styles.scanningText, { color: theme.colors.error, textAlign: 'center' }]}>{scanError}</Text>
+        </View>
+      ) : networks.length === 0 ? (
+        <View style={styles.scanningContainer}>
+          <Text style={[styles.scanningText, { color: theme.colors.textSecondary, textAlign: 'center' }]}>No WiFi devices found.</Text>
         </View>
       ) : (
         <FlatList

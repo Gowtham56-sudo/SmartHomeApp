@@ -53,16 +53,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: '1035147154678-lu3j8ajmra479viqu4kfu7op9jdftms1035147154678-155bp98ebl03kd37rdoq0ah7k72e78u0.apps.googleusercontent.coms.apps.googleusercontent.com',
     iosClientId: 'YOUR_IOS_CLIENT_ID',
-    expoClientId: 'YOUR_EXPO_CLIENT_ID'
+    clientId: 'YOUR_EXPO_CLIENT_ID'
   });
 
   const signInWithGoogle = async () => {
     try {
       const result = await promptAsync();
-      if (result?.type === 'success') {
-        const { id_token } = result.params;
-        const credential = GoogleAuthProvider.credential(id_token);
+      console.log('Google sign-in result:', result);
+      if (!result) {
+        throw new Error('No result returned from Google sign-in');
+      }
+      if (result.type !== 'success') {
+        throw new Error(`Google sign-in not successful. Type: ${result.type}`);
+      }
+      if (!result.params || !result.params.id_token) {
+        throw new Error('No id_token found in Google sign-in response');
+      }
+      const { id_token } = result.params;
+      const credential = GoogleAuthProvider.credential(id_token);
+      try {
         await signInWithCredential(auth, credential);
+      } catch (firebaseError) {
+        console.error('Firebase signInWithCredential error:', firebaseError);
+        throw firebaseError;
       }
     } catch (error) {
       console.error('Google sign-in error:', error);

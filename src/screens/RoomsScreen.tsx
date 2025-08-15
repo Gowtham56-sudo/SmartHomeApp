@@ -14,11 +14,12 @@ import {
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Home, Room, Device } from '../types';
+import { useRooms } from '../hooks/useFirestore';
 
 const RoomsScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, route }) => {
   const { home } = route.params;
   const { theme } = useTheme();
-  const [rooms, setRooms] = useState<Room[]>(home.rooms || []);
+  const { rooms, addRoom, removeRoom, loading } = useRooms(home.id);
   const [modalVisible, setModalVisible] = useState(false);
   const [roomName, setRoomName] = useState('');
   const [inputError, setInputError] = useState('');
@@ -28,17 +29,15 @@ const RoomsScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, ro
       setInputError('Room name is required');
       return;
     }
-    const newRoom: Room = {
-      id: Date.now().toString(),
-      name: roomName.trim(),
-      homeId: home.id,
-      devices: [],
-      createdAt: new Date(),
-    };
-    setRooms([...rooms, newRoom]);
-    setRoomName('');
-    setInputError('');
-    setModalVisible(false);
+    addRoom(roomName.trim())
+      .then(() => {
+        setRoomName('');
+        setInputError('');
+        setModalVisible(false);
+      })
+      .catch((error) => {
+        setInputError('Failed to add room');
+      });
   };
 
   const handleDeleteRoom = (roomId: string) => {
@@ -51,7 +50,7 @@ const RoomsScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, ro
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            setRooms(rooms.filter(room => room.id !== roomId));
+            removeRoom(roomId);
           },
         },
       ]

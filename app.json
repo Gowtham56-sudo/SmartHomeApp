@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "smarthomeapp",
+    "slug": "smarthomeapp",
+    "version": "1.0.0",
+    "sdkVersion": "53.0.0",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "android": {
+      "package": "dtronics.app"
+    }
+  }
+}

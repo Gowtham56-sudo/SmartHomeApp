@@ -28,10 +28,9 @@ const DevicesScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, 
           id: '1',
           name: 'Living Room Light',
           type: 'light',
-          roomId: room.id,
+          // roomId: room.id, // Removed to match Device type
           isOn: false,
           ipAddress: '192.168.1.100',
-          ssid: 'HomeWiFi',
           voltage: 120,
           current: 0.5,
           power: 60,
@@ -42,10 +41,8 @@ const DevicesScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, 
           id: '2',
           name: 'Ceiling Fan',
           type: 'fan',
-          roomId: room.id,
           isOn: true,
           ipAddress: '192.168.1.101',
-          ssid: 'HomeWiFi',
           voltage: 120,
           current: 1.2,
           power: 144,
@@ -56,7 +53,6 @@ const DevicesScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, 
           id: '3',
           name: 'Table Lamp',
           type: 'light',
-          roomId: room.id,
           isOn: false,
           ipAddress: '192.168.1.102',
           ssid: 'HomeWiFi',
@@ -97,7 +93,7 @@ const DevicesScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, 
   };
 
   const handleAddDevice = () => {
-    navigation.navigate('AddDevice', { room, home });
+  navigation.navigate('Add Device', { room, home });
   };
 
   const handleDeleteDevice = (deviceId: string) => {
